@@ -1,28 +1,92 @@
 import React, { useContext } from "react";
-import { StyleSheet, Text, View, FlatList, Button } from "react-native";
-import BlogContext from "../context/BlogContext";
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+import { Context } from "../context/BlogContext";
+import { AntDesign } from "@expo/vector-icons";
 
-const IndexScreen = () => {
-  const { data, dispatch } = useContext(BlogContext);
+const IndexScreen = ({ navigation }) => {
+  const { state, deleteBlogPost } = useContext(Context);
 
   return (
     <View>
-      <Text>Index Screen</Text>
-      <Button
-        title="Add Post"
-        onPress={}
-      />
+        { state.length === 0 ? <Text style={styles.empty}>No Blog Posts</Text> :
       <FlatList
-        data={data}
+        style={styles.list}
+        data={state}
         keyExtractor={(post) => post.title}
         renderItem={({ item }) => {
-          return <Text>{item.title}</Text>;
+          return (
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Show", { id: item.id })}
+            >
+              <View style={styles.blogButton}>
+                <Text style={styles.title}>
+                  {item.title} - {item.id}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    deleteBlogPost(item.id);
+                  }}
+                >
+                  <AntDesign name="delete" size={24} color="black" />
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          );
         }}
       />
+    }
     </View>
   );
 };
 
+IndexScreen.navigationOptions = ({ navigation }) => {
+  return {
+    headerRight: () => (
+      <TouchableOpacity onPress={() => navigation.navigate("Create")}>
+        <AntDesign
+          style={styles.headerRight}
+          name="plus"
+          size={24}
+          color="black"
+        />
+      </TouchableOpacity>
+    ),
+  };
+};
+
 export default IndexScreen;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  headerRight: {
+    marginRight: 20,
+  },
+  empty: {
+    alignSelf: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 15
+  },
+  list: {
+    marginTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "lightgray",
+  },
+  title: {
+    fontSize: 18,
+  },
+  blogButton: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "lightgray",
+    borderRadius: 5,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "white",
+  },
+});
