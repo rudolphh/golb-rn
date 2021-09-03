@@ -1,12 +1,13 @@
 import createDataContext from "./createDataContext";
+import jsonServer from "../api/jsonServer";
+import uuid from "react-native-uuid";
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case "get_posts":
+      return action.payload;
     case "add_post":
-      return [
-        ...state,
-        { id: Math.floor(Math.random() * 99999), ...action.payload },
-      ];
+      return [...state, action.payload];
 
     case "edit_post":
       return state.map((post) =>
@@ -21,38 +22,58 @@ const reducer = (state, action) => {
   }
 };
 
+const getBlogPosts = (dispatch) => {
+  return async () => {
+    try {
+      const response = await jsonServer.get("/blogposts");
+      dispatch({ type: "get_posts", payload: response.data });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+};
+
 const addBlogPost = (dispatch) => {
-  return (title, content, callback) => {
-    // use async (title, content, callback) => {}
-    // try {
-    // await axios.post('somepath', title, content)
-    dispatch({ type: "add_post", payload: { title, content } });
-    callback();
-    // } catch (err)
+  return async (title, content, callback) => {
+    try {
+      const response = await jsonServer.post("/blogposts", {
+        id: uuid.v4(), title, content
+      });
+      console.log(response.data);
+      dispatch({ type: "add_post", payload: response.data });
+      if (callback) callback();
+    } catch (err) { console.log(err); }
   };
 };
 
 const editBlogPost = (dispatch) => {
-  return (id, title, content, callback) => {
-    dispatch({ type: "edit_post", payload: { id, title, content } });
-    callback();
+  return async (id, title, content, callback) => {
+    try {
+      const response = await jsonServer.put(`/blogposts/${id}`, {
+        id, title, content
+      })
+      console.log(response.data);
+      dispatch({ type: "edit_post", payload: response.data });
+      if (callback) callback();
+    } catch (err) {
+      console.log(err);
+    }
   };
 };
 
 const deleteBlogPost = (dispatch) => {
-  return (id) => {
-    dispatch({ type: "delete_post", payload: id });
+  return async (id) => {
+    try {
+      const response = await jsonServer.delete(`/blogposts/${id}`)
+      dispatch({ type: "delete_post", payload: id });
+    } catch (err) {
+      console.log(err);
+    }
   };
 };
 
 export const { Context, Provider } = createDataContext(
   reducer,
-  { addBlogPost, editBlogPost, deleteBlogPost },
-  [
-    {
-      id: 1,
-      title: "Jesus",
-      content: "I trust in You",
-    },
-  ]
+  { getBlogPosts, addBlogPost, editBlogPost, deleteBlogPost },
+  []
 );

@@ -15,7 +15,7 @@ const ShowScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.blogPost}>
         <Text style={styles.title}>{post.title}</Text>
-        <Text>{post.content}</Text>
+        <Text style={styles.content}>{post.content}</Text>
       </View>
     </View>
   );
@@ -26,7 +26,7 @@ ShowScreen.navigationOptions = ({ navigation }) => {
     headerRight: () => (
       <TouchableOpacity
         onPress={() =>
-          navigation.navigate("Create", { id: navigation.getParam("id") })
+          navigation.navigate("Edit", { id: navigation.getParam("id") })
         }
       >
         <AntDesign
@@ -60,7 +60,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    marginBottom: 5,
+    marginBottom: 10,
     fontWeight: "bold",
   },
+  content: {
+    lineHeight: 25
+  }
 });
